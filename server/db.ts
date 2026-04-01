@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, inventory, projects, projectElements, terrainAnalysis, materialEstimates } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,57 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+export async function getUserById(userId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+// Projects queries
+export async function getUserProjects(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(projects).where(eq(projects.userId, userId));
+}
+
+export async function getProjectById(projectId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(projects).where(eq(projects.id, projectId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+// Inventory queries
+export async function getAllInventory() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(inventory);
+}
+
+export async function getInventoryByCategory(category: string) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(inventory).where(eq(inventory.category, category));
+}
+
+// Project elements queries
+export async function getProjectElements(projectId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(projectElements).where(eq(projectElements.projectId, projectId));
+}
+
+// Terrain analysis queries
+export async function getTerrainAnalysisByProject(projectId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(terrainAnalysis).where(eq(terrainAnalysis.projectId, projectId));
+}
+
+// Material estimates queries
+export async function getMaterialEstimatesByProject(projectId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(materialEstimates).where(eq(materialEstimates.projectId, projectId));
+}
